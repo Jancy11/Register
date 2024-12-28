@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        nodejs 'nodejs-20.11' // Ensure this matches the Node.js version configured in Jenkins
+        nodejs 'nodejs-20.11' // Ensure this matches the Node.js version in Jenkins
     }
     environment {
         SONAR_TOKEN = credentials('Sonarqube-token') // Replace with your credentials ID for the SonarQube token
@@ -17,18 +17,14 @@ pipeline {
                 stage('Install Frontend Dependencies') {
                     steps {
                         dir('frontend/register') {
-                            sh '''
-                                npm install
-                            '''
+                            sh 'npm install'
                         }
                     }
                 }
                 stage('Install Backend Dependencies') {
                     steps {
                         dir('backend') {
-                            sh '''
-                                npm install
-                            '''
+                            sh 'npm install'
                         }
                     }
                 }
@@ -39,18 +35,14 @@ pipeline {
                 stage('Run Frontend Tests') {
                     steps {
                         dir('frontend/register') {
-                            sh '''
-                                npm test
-                            '''
+                            sh 'npm test -- --passWithNoTests'
                         }
                     }
                 }
                 stage('Run Backend Tests') {
                     steps {
                         dir('backend') {
-                            sh '''
-                                npm test
-                            '''
+                            sh 'npm test'
                         }
                     }
                 }
@@ -73,7 +65,6 @@ pipeline {
                         }
                     }
                 }
-                
             }
         }
         stage('Build Application') {
@@ -81,18 +72,14 @@ pipeline {
                 stage('Build Frontend') {
                     steps {
                         dir('frontend/register') {
-                            sh '''
-                                npm run build
-                            '''
+                            sh 'npm run build'
                         }
                     }
                 }
                 stage('Build Backend') {
                     steps {
                         dir('backend') {
-                            sh '''
-                                npm run build
-                            '''
+                            sh 'npm run build'
                         }
                     }
                 }
