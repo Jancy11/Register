@@ -4,7 +4,7 @@ pipeline {
         nodejs 'nodejs-20.11' // Ensure this matches the Node.js version configured in Jenkins
     }
     environment {
-        SONAR_TOKEN = credentials('Sonarqube-token') // Replace with your SonarQube token credentials ID
+        SONAR_TOKEN = credentials('Sonarqube-token') // Replace with your credentials ID for the SonarQube token
     }
     stages {
         stage('Checkout') {
@@ -16,9 +16,8 @@ pipeline {
             parallel {
                 stage('Install Frontend Dependencies') {
                     steps {
-                        script {
+                        dir('frontend/register') {
                             sh '''
-                                cd Register/frontend/register
                                 npm install
                             '''
                         }
@@ -26,9 +25,8 @@ pipeline {
                 }
                 stage('Install Backend Dependencies') {
                     steps {
-                        script {
+                        dir('backend') {
                             sh '''
-                                cd Register/backend
                                 npm install
                             '''
                         }
@@ -40,9 +38,8 @@ pipeline {
             parallel {
                 stage('Run Frontend Tests') {
                     steps {
-                        script {
+                        dir('frontend/register') {
                             sh '''
-                                cd Register/frontend/register
                                 npm test
                             '''
                         }
@@ -50,9 +47,8 @@ pipeline {
                 }
                 stage('Run Backend Tests') {
                     steps {
-                        script {
+                        dir('backend') {
                             sh '''
-                                cd Register/backend
                                 npm test
                             '''
                         }
@@ -64,31 +60,31 @@ pipeline {
             parallel {
                 stage('SonarQube - Frontend') {
                     steps {
-                        withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration in Jenkins
-                            sh """
-                                cd Register/frontend/register
-                                npx sonar-scanner \\
-                                -Dsonar.projectKey=web-mern
-                                -Dsonar.sources=Register/frontend/register/src
-                                -Dsonar.exclusions=**/node_modules/**,**/*.test.js \\
-                                -Dsonar.host.url=http://localhost:9000 \\
-                                -Dsonar.login=$SONAR_TOKEN
-                            """
+                        dir('frontend/register') {
+                            withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration
+                                sh '''
+                                    npm run sonar -- \
+                                    -Dsonar.projectKey=web-mern \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.host.url=http://localhost:9000 \
+                                    -Dsonar.login=$SONAR_TOKEN
+                                '''
+                            }
                         }
                     }
                 }
                 stage('SonarQube - Backend') {
                     steps {
-                        withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration in Jenkins
-                            sh """
-                                cd Register/backend
-                                npx sonar-scanner \\
-                                -Dsonar.projectKey=web-mern \\
-                                -Dsonar.sources=Register/backend/src
-                                -Dsonar.exclusions=**/node_modules/**,**/*.test.js \\
-                                -Dsonar.host.url=http://localhost:9000 \\
-                                -Dsonar.login=$SONAR_TOKEN
-                            """
+                        dir('backend') {
+                            withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration
+                                sh '''
+                                    npm run sonar -- \
+                                    -Dsonar.projectKey=web-mern \
+                                    -Dsonar.sources=. \
+                                    -Dsonar.host.url=http://localhost:9000 \
+                                    -Dsonar.login=$SONAR_TOKEN
+                                '''
+                            }
                         }
                     }
                 }
@@ -98,9 +94,8 @@ pipeline {
             parallel {
                 stage('Build Frontend') {
                     steps {
-                        script {
+                        dir('frontend/register') {
                             sh '''
-                                cd Register/frontend/register
                                 npm run build
                             '''
                         }
@@ -108,10 +103,8 @@ pipeline {
                 }
                 stage('Build Backend') {
                     steps {
-                        script {
-                            // Backend build command, if applicable
+                        dir('backend') {
                             sh '''
-                                cd Register/backend
                                 npm run build
                             '''
                         }
