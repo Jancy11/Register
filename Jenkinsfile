@@ -13,32 +13,110 @@ pipeline {
             }
         }
         stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
+            parallel {
+                stage('Install Frontend Dependencies') {
+                    steps {
+                        script {
+                            sh '''
+                                cd Register/frontend/register
+                                npm install
+                            '''
+                        }
+                    }
+                }
+                stage('Install Backend Dependencies') {
+                    steps {
+                        script {
+                            sh '''
+                                cd Register/backend
+                                npm install
+                            '''
+                        }
+                    }
+                }
             }
         }
         stage('Run Tests') {
-            steps {
-                sh 'npm test'
+            parallel {
+                stage('Run Frontend Tests') {
+                    steps {
+                        script {
+                            sh '''
+                                cd Register/frontend/register
+                                npm test
+                            '''
+                        }
+                    }
+                }
+                stage('Run Backend Tests') {
+                    steps {
+                        script {
+                            sh '''
+                                cd Register/backend
+                                npm test
+                            '''
+                        }
+                    }
+                }
             }
         }
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration in Jenkins
-                    sh """
-                        npx sonar-scanner 
-                        -Dsonar.projectKey=mern-project 
-                        -Dsonar.sources=src 
-                        -Dsonar.exclusions=**/node_modules/**,**/*.test.js \\
-                        -Dsonar.host.url=http://localhost:9000 
-                        -Dsonar.login=$SONAR_TOKEN
-                    """
+            parallel {
+                stage('SonarQube - Frontend') {
+                    steps {
+                        withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration in Jenkins
+                            sh """
+                                cd Register/frontend/register
+                                npx sonar-scanner \\
+                                -Dsonar.projectKey=mern-frontend-project \\
+                                -Dsonar.sources=src \\
+                                -Dsonar.exclusions=**/node_modules/**,**/*.test.js \\
+                                -Dsonar.host.url=http://localhost:9000 \\
+                                -Dsonar.login=$SONAR_TOKEN
+                            """
+                        }
+                    }
+                }
+                stage('SonarQube - Backend') {
+                    steps {
+                        withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration in Jenkins
+                            sh """
+                                cd Register/backend
+                                npx sonar-scanner \\
+                                -Dsonar.projectKey=mern-backend-project \\
+                                -Dsonar.sources=src \\
+                                -Dsonar.exclusions=**/node_modules/**,**/*.test.js \\
+                                -Dsonar.host.url=http://localhost:9000 \\
+                                -Dsonar.login=$SONAR_TOKEN
+                            """
+                        }
+                    }
                 }
             }
         }
         stage('Build Application') {
-            steps {
-                sh 'npm run build'
+            parallel {
+                stage('Build Frontend') {
+                    steps {
+                        script {
+                            sh '''
+                                cd Register/frontend/register
+                                npm run build
+                            '''
+                        }
+                    }
+                }
+                stage('Build Backend') {
+                    steps {
+                        script {
+                            // Backend build command, if applicable
+                            sh '''
+                                cd Register/backend
+                                npm run build
+                            '''
+                        }
+                    }
+                }
             }
         }
     }
