@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        nodejs 'NodeJS 20' // Ensure this matches the Node.js version configured in Jenkins
+        nodejs 'nodejs-20.11' // Ensure this matches the Node.js version configured in Jenkins
     }
     environment {
         SONAR_TOKEN = credentials('Sonarqube-token') // Replace with your SonarQube token credentials ID
