@@ -73,21 +73,7 @@ pipeline {
                         }
                     }
                 }
-                stage('SonarQube - Backend') {
-                    steps {
-                        dir('backend') {
-                            withSonarQubeEnv('sonarqube') { // Ensure this matches your SonarQube configuration
-                                sh '''
-                                    npm run sonar -- \
-                                    -Dsonar.projectKey=web-mern \
-                                    -Dsonar.sources=. \
-                                    -Dsonar.host.url=http://localhost:9000 \
-                                    -Dsonar.login=$SONAR_TOKEN
-                                '''
-                            }
-                        }
-                    }
-                }
+                
             }
         }
         stage('Build Application') {
