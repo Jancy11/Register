@@ -68,8 +68,8 @@ pipeline {
                             sh """
                                 cd Register/frontend/register
                                 npx sonar-scanner \\
-                                -Dsonar.projectKey=mern-frontend-project \\
-                                -Dsonar.sources=src \\
+                                -Dsonar.projectKey=web-mern
+                                -Dsonar.sources=Register/frontend/register/src
                                 -Dsonar.exclusions=**/node_modules/**,**/*.test.js \\
                                 -Dsonar.host.url=http://localhost:9000 \\
                                 -Dsonar.login=$SONAR_TOKEN
@@ -83,8 +83,8 @@ pipeline {
                             sh """
                                 cd Register/backend
                                 npx sonar-scanner \\
-                                -Dsonar.projectKey=mern-backend-project \\
-                                -Dsonar.sources=src \\
+                                -Dsonar.projectKey=web-mern \\
+                                -Dsonar.sources=Register/backend/src
                                 -Dsonar.exclusions=**/node_modules/**,**/*.test.js \\
                                 -Dsonar.host.url=http://localhost:9000 \\
                                 -Dsonar.login=$SONAR_TOKEN
